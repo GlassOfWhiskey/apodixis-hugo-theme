@@ -1,0 +1,14 @@
+members:
+  - name: "Jane Doe"
+    role: "Principal Investigator"
+    photo: "/images/people/jane.png"
+    website: "https://example.org/jane"
+    google_scholar: ""
+    orcid: "0000-0000-0000-0001"
+
+  - name: "John Smith"
+    role: "PhD Student"
+    photo: "/images/people/john.png"
+    website: "https://example.org/john"
+    google_scholar: "ABCDEFGHIJK"
+    orcid: ""

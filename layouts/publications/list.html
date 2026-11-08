@@ -1,0 +1,106 @@
+{{ define "main" }}
+{{- $pubs := hugo.Data.publications -}}
+{{- $totals := dict -}}
+{{- range $pubs.years -}}
+  {{- range .entries -}}
+    {{- $kw := .keyword -}}
+    {{- $cur := index $totals $kw | default 0 -}}
+    {{- $totals = merge $totals (dict $kw (add $cur 1)) -}}
+  {{- end -}}
+{{- end -}}
+{{- $legendTypes := slice
+      (dict "kw" "journal" "label" "Journal article")
+      (dict "kw" "conference" "label" "Conference paper")
+      (dict "kw" "book" "label" "Book chapter")
+      (dict "kw" "poster" "label" "Poster")
+      (dict "kw" "thesis" "label" "Thesis") -}}
+<div>
+  {{ if $pubs }}
+  <div class="pub-legend">
+    {{- range $legendTypes -}}
+    {{- if gt (index $totals .kw | default 0) 0 -}}
+    <span class="pub-legend-swatch pub-legend-swatch--{{ .kw }}"></span> {{ .label }}
+    {{- end -}}
+    {{- end -}}
+  </div>
+
+    {{- $prefixes := dict "journal" "J" "conference" "C" "book" "B" "poster" "P" "thesis" "T" -}}
+    {{- $counters := $totals -}}
+
+    {{ range $pubs.years }}
+    <section class="subsection">
+      <h2 class="section-heading" id="{{ .year }}">{{ .year }}</h2>
+      <ul class="pub-list">
+        {{ range .entries }}
+        {{- $kw       := .keyword -}}
+        {{- $entryKey := .key -}}
+        {{- $nAuthors := len .authors -}}
+        {{- $prefix   := index $prefixes $kw | default "?" -}}
+        {{- $cnt      := index $counters $kw | default 0 -}}
+        <li class="pub-entry">
+          <span class="pub-number">[{{ $prefix }}{{ $cnt }}]</span>
+          <span class="pub-badge pub-badge--{{ $kw }}"></span>
+          <div class="pub-body">
+            <span class="pub-authors">
+              {{- range $i, $a := .authors -}}
+                {{- if gt $i 0 -}}
+                  {{- $sep := ", " -}}
+                  {{- if and (ge $nAuthors 3) (eq $i (sub $nAuthors 1)) -}}{{- $sep = ", and " -}}{{- end -}}
+                  {{- if and (eq $nAuthors 2) (eq $i 1) -}}{{- $sep = " and " -}}{{- end -}}
+                  {{- $sep -}}
+                {{- end -}}
+                {{ $a.initials }} {{ $a.family }}
+              {{- end -}}
+            </span>,
+            &#8220;<span class="entry-title">{{ .title }}</span>,&#8221;
+            {{- if eq $kw "thesis" -}}
+              {{- with .thesis_type }} {{ . }}{{ end -}}
+              {{- with .venue }}, <em class="pub-venue">{{ . }}</em>{{ end -}}
+              {{- with .publisher_place }}, {{ . }}{{ end -}}
+              , {{ with .month }}{{ . }} {{ end }}{{ .year -}}
+            {{- else if or (eq $kw "conference") (eq $kw "book") -}}
+              {{- with .venue }} in <em class="pub-venue">{{ . }}</em>{{ end -}}
+              {{- if and .publisher_place .publisher -}}, {{ .publisher_place }}: {{ .publisher -}}
+              {{- else if .publisher_place -}}, {{ .publisher_place -}}
+              {{- else if .publisher -}}: {{ .publisher -}}
+              {{- end -}}
+              {{- with .editor }}, {{ . }}{{ end -}}
+              , {{ with .month }}{{ . }} {{ end }}{{ .year -}}
+              {{- with .pages -}}, pp. {{ . | replaceRE "---" "—" | replaceRE "-+" "–" }}{{- end -}}
+            {{- else -}}
+              {{- with .venue }} <em class="pub-venue">{{ . }}</em>{{ end -}}
+              {{- with .volume }}, vol. {{ . }}{{ end -}}
+              {{- with .number }}, no. {{ . }}{{ end -}}
+              {{- with .pages -}}, pp. {{ . | replaceRE "---" "—" | replaceRE "-+" "–" }}{{- end -}}
+              , {{ .year -}}
+            {{- end -}}
+            .
+            <div class="entry-btn-row">
+              {{- with .abstract }}
+              <details name="details-{{ $entryKey }}" class="entry-details">
+                <summary class="entry-btn">Abstract</summary>
+                <div class="entry-abstract-body">{{ . }}</div>
+              </details>
+              {{- end }}
+              {{- with .bibtex }}
+              <details name="details-{{ $entryKey }}" class="entry-details">
+                <summary class="entry-btn">BibTeX</summary>
+                <div class="entry-bibtex-body"><pre>{{ . }}</pre></div>
+              </details>
+              {{- end }}
+              {{- with .doi }}
+              <a class="entry-btn" href="https://doi.org/{{ . }}" target="_blank" rel="noopener">DOI</a>
+              {{- end }}
+            </div>
+          </div>
+        </li>
+        {{- $counters = merge $counters (dict $kw (sub $cnt 1)) -}}
+        {{ end }}
+      </ul>
+    </section>
+    {{ end }}
+  {{ else }}
+  <p class="pub-empty">No publications data found.</p>
+  {{ end }}
+</div>
+{{ end }}

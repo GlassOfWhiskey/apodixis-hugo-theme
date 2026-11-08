@@ -1,0 +1,33 @@
+{{- /* Renders a logo image: inlines `.svg` files (via the pipeline) or emits an
+  `<img>` for `.png` files. Accepts a `dict` with:
+    path  string  filesystem path to a logo under the site's `assets/` directory
+                  (e.g. "/images/logos/my-logo.svg"). Files in `assets/` exist
+                  only for Hugo's pipeline — they are NOT copied to the built
+                  site — which suits SVGs that are inlined and never referenced
+                  standalone; PNGs are referenced through the asset's published
+                  URL. The `static/` readFile below is kept as a fallback for
+                  sites that still ship logos as static files.
+
+  SVG: the markup is inlined verbatim (no CSS classes injected), so theme CSS can
+  style it purely via the wrapping `.custom-logo` / `.footer-logo-mark` element.
+  PNG: renders <img src alt=""> pointing at the resolved asset/static URL.
+  Renders nothing when the file cannot be resolved.
+*/ -}}
+
+{{- $path := .path | default "" -}}
+{{- $rel := strings.TrimPrefix "/" $path -}}
+{{- $ext := lower (path.Ext $rel) -}}
+
+{{- if eq $ext ".svg" -}}
+  {{- $svg := "" -}}
+  {{- with readFile (printf "static/%s" $rel) -}}
+    {{- $svg = . -}}
+  {{- else -}}
+    {{- with resources.Get $rel -}}{{- $svg = .Content -}}{{- end -}}
+  {{- end -}}
+  {{- if $svg -}}{{- $svg | safeHTML -}}{{- end -}}
+{{- else if eq $ext ".png" -}}
+  {{- $src := print (strings.TrimSuffix "/" site.BaseURL) $path -}}
+  {{- with resources.Get $rel -}}{{- $src = .RelPermalink -}}{{- end -}}
+  <img src="{{ $src }}" alt="" loading="lazy">
+{{- end -}}

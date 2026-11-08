@@ -1,0 +1,1413 @@
+// ── apodixis Hugo theme – Main Stylesheet ─────────────────────────────────────
+// Shared shell for project websites (UV/Research groups). Brand colors are
+// driven by CSS variables emitted into :root from `css/variables.scss`
+// (see below). Override the palette by placing your own `assets/css/variables.scss`
+// in the consuming site — its copy shadows the theme's.
+
+// ── SCSS helpers ────────────────────────────────────────────────────────────
+
+// Bring in the theme's overridable palette maps (`$defaults`, `$dark-defaults`).
+// Sites that include their own `assets/css/variables.scss` override these.
+@use "variables" as *;
+
+$font: "Inter var", -apple-system, BlinkMacSystemFont, "Helvetica Neue", Helvetica, sans-serif;
+$font-display: "Inter Display", "Satoshi", sans-serif;
+$max-w: 1200px;
+$white: #ffffff;
+
+  // ── Typographic scale ─────────────────────────────────────────────────────
+  $h1: 3rem;
+  $h2: 2.5rem;
+  $h3: 2rem;
+  $h5: 1.5rem;
+  $body-font-size: 1rem;
+  $small-font-size: 0.875rem;
+  $mono-font: "JetBrains Mono", "SF Mono", "Courier New", monospace;
+
+  // Swap between a light-mode element and its dark-mode counterpart,
+  // honoring the theme mode (auto/OS preference + manual toggle, or a forced
+  // dark/light data-theme). See the mode logic near the theme-variable section.
+  @mixin theme-swap($light, $dark) {
+    // Forced dark mode: swap to the dark element.
+    html[data-theme="dark"] #{$light} { display: none; }
+    html[data-theme="dark"] #{$dark} { display: block; }
+
+    // Auto mode mirrors the OS preference; the manual toggle inverts it.
+    html[data-theme="auto"] {
+      .theme-toggle-input:checked ~ .page-wrapper #{$light} { display: none; }
+      .theme-toggle-input:checked ~ .page-wrapper #{$dark} { display: block; }
+
+      @media (prefers-color-scheme: dark) {
+        #{$light} { display: none; }
+        #{$dark} { display: block; }
+        .theme-toggle-input:checked ~ .page-wrapper #{$light} { display: block; }
+        .theme-toggle-input:checked ~ .page-wrapper #{$dark} { display: none; }
+      }
+    }
+  }
+
+// ── Theme color palettes ──────────────────────────────────────────────────────
+// The `$defaults` (light) and `$dark-defaults` (dark) maps live in
+// `css/variables.scss` (the single overridable source). That file is transpiled
+// standalone by partials/head.html and emits the `:root` variables itself, so a
+// site's own `assets/css/variables.scss` not only changes the values but remains
+// the single place they surface into CSS. `main.scss` only `@use`s the maps for
+// the dark/light mixins below.
+
+// Re-applies the light palette on an element (used to revert the OS-dark
+// auto-switch when the manual toggle is set to light mode). Each variable is
+// reset to `inherit` so it falls back to the :root baseline, which carries the
+// theme defaults plus any site `variables.scss` overrides.
+@mixin light-theme {
+  @each $k, $v in $defaults {
+    --#{$k}: inherit;
+  }
+}
+
+// Applies the dark palette. Every surfaced `--*` variable is driven by its
+// `--dark-*` counterpart from :root, so a site override of a `--dark-*`
+// variable lands everywhere dark-mode is active — OS-dark or manual toggle.
+@mixin dark-theme {
+  @each $k, $v in $dark-defaults {
+    --#{$k}: var(--dark-#{$k});
+  }
+  // Hero backdrop is theme-invariant: inherits the brand from :root so the
+  // hero band reads the same in light and dark.
+  --hero-start: inherit;
+  --hero-end: inherit;
+  // Publication type colors are theme-invariant: they inherit from :root (no
+  // dark-mode override) so each type's badge and legend swatch read identically
+  // in light and dark mode.
+}
+
+// ── Theme mode (denormalized to the `data-theme` attribute on <html>) ────────
+//   data-theme="auto"  (default) follow the OS/browser preference; the manual
+//                      toggle (checked = dark on a light OS, light on a dark OS)
+//                      lets the visitor flip away from the OS default.
+//   data-theme="dark"  force the dark palette (toggle has no effect).
+//   data-theme="light" force the light palette.
+
+// Forced modes — no media query involved, no flash on first paint.
+html[data-theme="dark"] .page-wrapper { @include dark-theme; }
+html[data-theme="light"] .page-wrapper { @include light-theme; }
+
+// Auto mode: manual toggle (checkbox) forces the OPPOSITE of the OS preference.
+html[data-theme="auto"] .theme-toggle-input:checked ~ .page-wrapper { @include dark-theme; }
+
+@media (prefers-color-scheme: dark) {
+  // OS dark default (auto mode).
+  html[data-theme="auto"] .page-wrapper { @include dark-theme; }
+
+  // Manual toggle set to flip away from OS-dark → light palette.
+  html[data-theme="auto"] .theme-toggle-input:checked ~ .page-wrapper { @include light-theme; }
+}
+
+// ── Reset & Base ────────────────────────────────────────────────────────────
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: $white;
+  font-family: $font;
+  font-size: $body-font-size;
+  line-height: 1.65;
+}
+
+img { max-width: 100%; height: auto; display: block; }
+
+a {
+  color: var(--primary);
+  text-decoration: none;
+  &:hover { text-decoration: underline; }
+}
+
+// ── Layout ──────────────────────────────────────────────────────────────────
+
+.page-wrapper {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
+}
+
+.section-inner {
+  max-width: $max-w;
+  margin: 0 auto;
+  padding: 0 1rem;
+
+  @media (min-width: 601px) { padding: 0 2rem; }
+}
+
+// ── Navigation ──────────────────────────────────────────────────────────────
+
+.nav-toggle-input,
+.theme-toggle-input { display: none; }
+
+.site-header {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  z-index: 100;
+  transition: background 0.2s, border-color 0.2s;
+
+  @media (min-width: 901px) { position: sticky; top: 0; }
+}
+
+.nav {
+  max-width: $max-w;
+  margin: 0 auto;
+  padding: 0 2rem;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+
+  @media (min-width: 901px) { height: 64px; }
+}
+
+.nav-brand {
+  display: block;
+  line-height: 0;
+
+  &:hover { text-decoration: none; }
+
+  .custom-logo,
+  .custom-logo-white {
+    width: 150px;
+    height: auto;
+    display: block;
+
+    svg,
+    img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+
+  .custom-logo-white { display: none; }
+}
+
+@include theme-swap(".nav-brand .custom-logo", ".nav-brand .custom-logo-white");
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+
+  @media (min-width: 901px) { gap: 1.5rem; }
+}
+
+.nav-links {
+  list-style: none;
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding: 0.5rem 2rem 1rem;
+  z-index: 99;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+
+  @media (min-width: 901px) {
+    display: flex;
+    position: static;
+    flex-direction: row;
+    gap: 2rem;
+    padding: 0;
+    background: none;
+    border-bottom: none;
+  }
+
+  li a {
+    display: block;
+    padding: 0.5rem 0;
+    font-size: $small-font-size;
+    font-weight: 500;
+    color: var(--text-muted);
+    border-bottom: none;
+    transition: color 0.15s;
+
+    @media (min-width: 901px) {
+      display: inline;
+      padding: 0 0 2px;
+      border-bottom: 2px solid transparent;
+    }
+
+    &:hover { color: var(--primary); text-decoration: none; }
+    &.current, &.ancestor { color: var(--primary); }
+
+    @media (min-width: 901px) {
+      &.current, &.ancestor { border-bottom-color: var(--primary); }
+    }
+  }
+
+  .has-children {
+    position: relative;
+
+    .submenu {
+      list-style: none;
+      margin: 0;
+      padding: 0.25rem 0 0 1rem;
+    }
+
+    @media (min-width: 901px) {
+      > a::after {
+        content: "";
+        display: inline-block;
+        width: 14px;
+        height: 14px;
+        margin-left: 6px;
+        vertical-align: -2px;
+        background: currentColor;
+        -webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+        -webkit-mask-repeat: no-repeat;
+        mask-repeat: no-repeat;
+        -webkit-mask-position: center;
+        mask-position: center;
+      }
+
+      .submenu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        padding: 0.5rem 0;
+        min-width: 10rem;
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 6px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        visibility: hidden;
+        transition: opacity 0.15s, visibility 0.15s;
+        z-index: 99;
+
+        li a {
+          display: block;
+          padding: 0.35rem 1rem;
+          white-space: nowrap;
+        }
+      }
+
+      &:hover .submenu {
+        opacity: 1;
+        visibility: visible;
+      }
+    }
+  }
+}
+
+.nav-toggle-input:checked ~ .nav {
+  .nav-links { display: flex; }
+  .nav-toggle-label svg:not(.nav-toggle-close) { display: none; }
+  .nav-toggle-label .nav-toggle-close { display: block; }
+}
+
+.nav-toggle-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--text-muted);
+  line-height: 0;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s;
+
+  @media (min-width: 901px) { display: none; }
+
+  &:hover { color: var(--primary); }
+
+  .nav-toggle-close { display: none; }
+}
+
+.theme-toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--btn-bg);
+  color: var(--btn-text);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: border-color 0.15s, color 0.15s, background 0.2s;
+
+  &:hover { border-color: var(--primary); color: var(--primary); }
+}
+
+.icon-moon { display: block; }
+.icon-sun  { display: none; }
+
+@include theme-swap(".icon-moon", ".icon-sun");
+
+// ── Hero section (home page only) ───────────────────────────────────────────
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, var(--hero-start), var(--hero-end), var(--hero-start));
+  background-size: 200% 200%;
+  animation: heroGradient 12s ease infinite;
+  color: $white;
+  padding: 2rem 0 4rem;
+  text-align: center;
+
+  @media (min-width: 901px) { padding: 3rem 0 5rem; }
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  width: 200px;
+  height: 200px;
+  top: -60px;
+  right: -40px;
+  background: rgba(255, 255, 255, 0.07);
+  animation: floatShape 22s ease-in-out infinite;
+
+  @media (min-width: 901px) {
+    width: 360px;
+    height: 360px;
+    top: -100px;
+    right: -80px;
+  }
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  display: none;
+
+  @media (min-width: 901px) {
+    display: block;
+    width: 200px;
+    height: 200px;
+    bottom: -60px;
+    left: -60px;
+    background: rgba(255, 255, 255, 0.06);
+    animation: floatShape 18s ease-in-out infinite reverse;
+  }
+}
+
+.hero-inner {
+  position: relative;
+  z-index: 1;
+  max-width: $max-w;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+.hero-inner::before {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  display: none;
+
+  @media (min-width: 901px) {
+    display: block;
+    width: 130px;
+    height: 130px;
+    top: 30%;
+    left: 12%;
+    background: rgba(255, 255, 255, 0.05);
+    animation: floatShape 26s ease-in-out infinite;
+    animation-delay: -7s;
+  }
+}
+
+.hero-title {
+  font-size: $h2;
+  font-family: $font-display;
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 0.5rem;
+
+  @media (min-width: 901px)  { font-size: $h1; }
+  @media (min-width: 1200px) { font-size: calc($h1 * 1.2857); }
+}
+
+.hero-subtitle {
+  font-size: $body-font-size;
+  font-weight: 400;
+  opacity: 1;
+}
+
+.hero-actions {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  flex-wrap: wrap;
+}
+
+.hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.6rem 1.25rem;
+  border-radius: 6px;
+  font-size: $small-font-size;
+  font-weight: 600;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  text-decoration: none;
+
+  &:hover { text-decoration: none; }
+}
+
+.hero-btn--primary {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    color: #fff;
+  }
+}
+
+.hero-badge {
+  display: flex;
+  align-items: center;
+  line-height: 0;
+
+  img {
+    display: block;
+    height: 28px;
+    width: auto;
+  }
+
+  &:hover { opacity: 0.85; }
+}
+
+@keyframes heroGradient {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes floatShape {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25%      { transform: translate(18px, -28px) scale(1.06); }
+  50%      { transform: translate(-12px, 12px) scale(0.94); }
+  75%      { transform: translate(22px, 18px) scale(1.03); }
+}
+
+// ── Terminal pane (used by sites' hero/home content) ────────────────────────
+
+.qs-term-pane {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow: hidden;
+  text-align: left;
+
+  .qs-term-bar {
+    background: var(--bg-alt);
+    padding: 0.5rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .qs-term-dot {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+  }
+
+  .qs-dot-red    { background: #ff5f57; }
+  .qs-dot-yellow { background: #febc2e; }
+  .qs-dot-green  { background: #28c840; }
+
+  .qs-term-title {
+    margin-left: auto;
+    font-size: $small-font-size;
+    color: var(--text-muted);
+    font-family: $mono-font;
+  }
+
+  .qs-term-body {
+    background: #1e1e1e;
+    padding: 1rem 1.25rem;
+    overflow-x: auto;
+
+    pre {
+      margin: 0;
+      font-family: $mono-font;
+      font-size: $small-font-size;
+      line-height: 1.7;
+      color: #d4d4d4;
+    }
+
+    code {
+      color: inherit;
+    }
+  }
+}
+
+.qs-prompt {
+  color: #6a9955;
+  user-select: none;
+  margin-right: 0.5rem;
+}
+
+// ── Cards (base + homepage + people) ─────────────────────────────────────────
+
+%card-base {
+  background: var(--bg-card);
+  border-radius: 5px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+  transition: box-shadow 0.2s;
+}
+
+.homepage-cards {
+  max-width: $max-w;
+  margin: -3rem auto 0;
+  padding: 0 1rem 2rem;
+  position: relative;
+  z-index: 1;
+
+  @media (min-width: 601px) { padding: 0 2rem 3rem; }
+}
+
+.hp-columns {
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+
+  @media (max-width: 900px) { flex-direction: column; }
+}
+
+.hp-card {
+  @extend %card-base;
+  flex: 1;
+  padding: 2rem 1.5rem;
+  text-align: center;
+
+  h2 {
+    font-size: $h3;
+    font-weight: 700;
+    color: var(--primary);
+    margin: 1rem 0 0.75rem;
+  }
+
+  p {
+    font-size: $body-font-size;
+    color: var(--text-muted);
+    line-height: 1.6;
+  }
+}
+
+// Only the card icon is a clickable link (when the card has a `url`). Title and
+// text stay static text; the icon highlight / move is scoped to the icon link so
+// cards without a `url` (no .hp-icon-link) get no hover effects. The link is
+// inline-block so it centers within the `.hp-icon` (text-align: center on the
+// card) exactly like the bare SVG would.
+.hp-icon-link {
+  display: inline-block;
+
+  &:hover .hp-icon {
+    color: var(--success);
+    transform: scale(1.08);
+  }
+}
+
+.hp-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--accent);
+  transition: color 0.3s, transform 0.3s;
+
+  // When a uniform `icon_size` is configured, the span gets an explicit width
+  // and the inlined SVG fills it (keeping its intrinsic ratio); without one the
+  // inline-flex span shrinks to the SVG's natural size. `width: 100%` (not
+  // max-width) mirrors the proven `.footer-logo--svg` sizing so `height: auto`
+  // reliably derives from the SVG's viewBox in every branch.
+  svg {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+}
+
+// ── People ───────────────────────────────────────────────────────────────────
+
+.people-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 2rem;
+}
+
+.people-card {
+  @extend %card-base;
+  padding: 2rem 1.5rem;
+  text-align: center;
+  flex: 0 0 160px;
+
+  @media (min-width: 901px) { flex: 0 0 220px; }
+
+  &:hover { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12); }
+
+  &:hover .people-photo img {
+    border-color: var(--success);
+    transform: scale(1.08);
+  }
+}
+
+.people-card-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.people-photo {
+  display: block;
+  line-height: 0;
+
+  img {
+    border: 3px solid var(--accent);
+    border-radius: 50%;
+    width: 140px;
+    height: 140px;
+    object-fit: cover;
+    transition: border-color 0.3s, transform 0.3s;
+  }
+}
+
+.people-name {
+  display: block;
+  margin-top: 0.85rem;
+  font-weight: 700;
+  font-size: $h5;
+  font-family: $font-display;
+  color: var(--primary);
+  line-height: 1.3;
+}
+
+.people-role {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: $small-font-size;
+  color: var(--text-muted);
+}
+
+.people-icon {
+  display: flex;
+  align-items: center;
+  color: var(--accent);
+  transition: color 0.15s;
+
+  &:hover { color: var(--success); text-decoration: none; }
+}
+
+.people-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  margin-top: 0.6rem;
+}
+
+// ── Page content (headers, body text) ───────────────────────────────────────
+
+.page-header {
+  padding: 2rem 0;
+  text-align: center;
+}
+
+.page-title {
+  font-size: $h2;
+  font-family: $font-display;
+  font-weight: 700;
+  color: var(--primary);
+
+  body.home & { display: none; }
+}
+
+.main-content {
+  flex: 1;
+  padding: 3rem 0;
+
+  body.home & { padding-top: 0; }
+}
+
+.entry-content {
+  max-width: 80rem;
+
+  h2 {
+    color: var(--primary);
+    font-size: $h2;
+    font-family: $font-display;
+    margin: 1.75rem 0 0.75rem;
+  }
+
+  h3 {
+    font-size: $h3;
+    font-family: $font-display;
+    margin: 1.5rem 0 0.5rem;
+  }
+
+  p { margin-bottom: 1rem; }
+
+  ul, ol { margin: 0 0 1rem 2rem; }
+
+  li { margin-bottom: 0.3rem; }
+
+  blockquote {
+    border-left: 4px solid var(--accent);
+    padding: 0.75rem 1.25rem;
+    margin: 1.5rem 0;
+    background: var(--bg-card);
+    border-radius: 0 4px 4px 0;
+    color: var(--text-muted);
+    font-size: $body-font-size;
+  }
+
+  figure {
+    margin: 1.5rem 0;
+    text-align: center;
+  }
+
+  figcaption {
+    font-size: $body-font-size;
+    font-style: italic;
+    color: var(--text-muted);
+    margin-top: 0.5rem;
+  }
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0 auto;
+  }
+}
+
+// ── Publications ────────────────────────────────────────────────────────────
+
+.section-heading {
+  font-size: $h3;
+  font-family: $font-display;
+  font-weight: 700;
+  color: var(--primary);
+  border-bottom: 2px solid var(--border);
+  padding-bottom: 0.35rem;
+  margin-bottom: 1rem;
+}
+
+.subsection {
+  margin-bottom: 2.5rem;
+  &:last-child { margin-bottom: 0; }
+}
+
+.pub-legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem 1.25rem;
+  font-size: $small-font-size;
+  color: var(--text-muted);
+  margin-bottom: 2rem;
+  padding: 0.65rem 0.9rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-card);
+}
+
+.pub-list {
+  list-style: none;
+  padding: 0;
+
+  li + li { margin-top: 1rem; }
+}
+
+.pub-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: $body-font-size;
+  line-height: 1.6;
+}
+
+.pub-number {
+  flex-shrink: 0;
+  width: 3rem;
+  text-align: right;
+  color: var(--text-muted);
+  font-size: $small-font-size;
+  font-variant-numeric: tabular-nums;
+  padding-top: 0.18em;
+}
+
+.pub-badge {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 5px;
+  height: 1.05em;
+  border-radius: 2px;
+  margin-top: 0.28em;
+  align-self: flex-start;
+
+  &.pub-badge--journal    { background: var(--pubtype-journal);    }
+  &.pub-badge--conference { background: var(--pubtype-conference); }
+  &.pub-badge--book       { background: var(--pubtype-book);       }
+  &.pub-badge--poster     { background: var(--pubtype-poster);     }
+  &.pub-badge--thesis     { background: var(--pubtype-thesis);     }
+
+  .pub-legend & {
+    height: 0.9em;
+    margin-top: 0;
+    align-self: auto;
+    vertical-align: middle;
+  }
+}
+
+// Legend swatches render as thin rectangles (same shape as the inline
+// `.pub-badge` marks) and share the same single `--pubtype-*` color per type.
+.pub-legend-swatch {
+  flex-shrink: 0;
+  display: inline-block;
+  width: 5px;
+  height: 0.9em;
+  border-radius: 2px;
+  vertical-align: middle;
+
+  &.pub-legend-swatch--journal    { background: var(--pubtype-journal);    }
+  &.pub-legend-swatch--conference { background: var(--pubtype-conference); }
+  &.pub-legend-swatch--book       { background: var(--pubtype-book);       }
+  &.pub-legend-swatch--poster     { background: var(--pubtype-poster);     }
+  &.pub-legend-swatch--thesis     { background: var(--pubtype-thesis);     }
+}
+
+.pub-body { flex: 1; min-width: 0; position: relative; }
+
+.pub-authors,
+.pub-venue { color: var(--text-muted); }
+
+.entry-title { font-weight: 600; }
+
+.entry-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  align-items: flex-start;
+}
+
+.entry-btn {
+  font-size: $small-font-size;
+  padding: 0.1rem 0.4rem;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  color: var(--primary);
+  cursor: pointer;
+  background: var(--bg-card);
+  transition: border-color 0.15s;
+
+  &:hover { border-color: var(--primary); text-decoration: none; }
+}
+
+.entry-details {
+  vertical-align: top;
+
+  summary {
+    cursor: pointer;
+    list-style: none;
+    display: inline-block;
+    &::-webkit-details-marker { display: none; }
+  }
+
+  &[open] .entry-abstract-body,
+  &[open] .entry-bibtex-body {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: calc(100% + 0.35rem);
+    z-index: 10;
+    display: block;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-left: 2px solid var(--accent);
+    border-radius: 4px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+}
+
+.entry-abstract-body,
+.entry-bibtex-body {
+  font-size: $small-font-size;
+  color: var(--text);
+  line-height: 1.55;
+  padding: 0.5rem 0.65rem;
+  border-left: 2px solid var(--border);
+  margin-top: 0.35rem;
+  display: none;
+
+  pre {
+    font-size: $small-font-size;
+    line-height: 1.35;
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-all;
+  }
+}
+
+.pub-empty {
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+// ── Use cases ───────────────────────────────────────────────────────────────
+
+.usecase-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+
+  @media (min-width: 601px) {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+.usecase-card {
+  @extend %card-base;
+  overflow: hidden;
+  text-decoration: none;
+  transition: box-shadow 0.2s, transform 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
+  }
+
+  .usecase-card-link {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .usecase-card-media {
+    display: block;
+    line-height: 0;
+    max-width: 100%;
+    background: var(--bg-alt);
+
+    img {
+      display: block;
+      width: 100%;
+      object-fit: contain;
+      object-position: center;
+      transition: transform 0.3s;
+    }
+  }
+
+  &:hover .usecase-card-media img {
+    transform: scale(1.04);
+  }
+
+  .usecase-card-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    padding: 1.5rem;
+    flex: 1;
+  }
+
+  .usecase-card-category {
+    font-size: $small-font-size;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--accent);
+  }
+
+  .usecase-card-title {
+    font-family: $font-display;
+    font-size: $h5;
+    font-weight: 700;
+    line-height: 1.25;
+    color: var(--primary);
+    margin: 0;
+  }
+
+  .usecase-card-summary {
+    font-size: $body-font-size;
+    color: var(--text-muted);
+    line-height: 1.55;
+  }
+}
+
+// Pagination bar for paginated list sections (use cases and anything else that
+// uses `partials/pagination.html`).
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem 1rem;
+  flex-wrap: wrap;
+
+  .pagination-center {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .pagination-link {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 2.5rem;
+    height: 2.5rem;
+    padding: 0 0.75rem;
+    font-size: $small-font-size;
+    font-weight: 500;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    text-decoration: none;
+    transition: color 0.15s, background 0.15s, border-color 0.15s;
+
+    &:hover {
+      color: var(--accent);
+      border-color: var(--accent);
+      text-decoration: none;
+    }
+
+    &.pagination-active {
+      color: #fff;
+      background: var(--accent);
+      border-color: var(--accent);
+    }
+  }
+}
+
+// Featured image on the single use-case page. The figure shrink-wraps the
+// image (width: fit-content) so the framed card hugs the image instead of
+// spanning the whole content column, and is centered. The image keeps its
+// natural contained aspect ratio (never stretched), capped at the configured
+// max height via the inline `max-height`. No 16:9 imposition: the image keeps
+// its source aspect ratio.
+.usecase-featured {
+  margin: 0 auto 2rem;
+  max-width: 100%;
+  width: fit-content;
+  text-align: center;
+  line-height: 0;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 0.5rem;
+  overflow: hidden;
+
+  img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    object-fit: contain;
+    object-position: center;
+  }
+}
+
+.secnav {
+  margin-top: 2rem;
+  font-size: $small-font-size;
+
+  a {
+    color: var(--accent);
+    &:hover { color: var(--primary); }
+  }
+}
+
+// ── Footer ──────────────────────────────────────────────────────────────────
+
+.site-footer {
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+  font-size: $small-font-size;
+  color: var(--text-muted);
+  margin-top: auto;
+}
+
+.footer-inner {
+  max-width: $max-w;
+  margin: 0 auto;
+  padding: 1.1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.footer-copy {
+  font-size: $small-font-size;
+  a { color: var(--text-muted); }
+}
+
+.footer-logos {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+
+  a.footer-logo {
+    display: block;
+    line-height: 0;
+    cursor: pointer;
+    -webkit-mask-size: contain;
+    -webkit-mask-repeat: no-repeat;
+    -webkit-mask-position: center;
+    mask: contain no-repeat center;
+    background: var(--text-muted);
+    opacity: 0.75;
+  }
+
+  a.footer-logo--svg {
+    background: none;
+    opacity: 1;
+
+    svg,
+    img { display: block; height: auto; }
+  }
+
+  // Inline (path-based) logos with an explicit dark variant swap between a
+  // default mark and a dark mark, mirroring the header logo and theme-toggle:
+  // honor the OS preference and the manual toggle via the theme-swap mixin.
+  // Logos with only a single `logo` (no `.footer-logo--dual`) always show it.
+  .footer-logo-mark,
+  .footer-logo-mark--dark {
+    display: block;
+    line-height: 0;
+
+    svg,
+    img { display: block; height: auto; width: 100%; }
+  }
+}
+
+// Default shows the light mark. Hide the dark mark by default. This selector
+// must carry the SAME specificity as the theme-swap rules below (and appear
+// before them) so the swap can override it on a source-order tie — mirroring
+// `.nav-brand .custom-logo-white`.
+.footer-logo--dual .footer-logo-mark--dark { display: none; }
+
+// Swap default/dark footer-logo marks across the OS-dark switch and manual toggle.
+@include theme-swap(".footer-logo--dual .footer-logo-mark", ".footer-logo--dual .footer-logo-mark--dark");
+
+.footer-right {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.footer-icons {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+
+  a {
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    transition: color 0.15s;
+    &:hover { color: var(--primary); text-decoration: none; }
+  }
+}
+
+.to-the-top {
+  color: var(--text-muted);
+  font-size: $small-font-size;
+  white-space: nowrap;
+  &:hover { color: var(--primary); text-decoration: none; }
+}
+
+// ── Header/Footer text color toggle ───────────────────────────────────
+// Keeps nav link hover visible in dark mode (auto mode only, matching the
+// mode logic above).
+
+@media (prefers-color-scheme: dark) {
+  html[data-theme="auto"] .nav-links li a:hover,
+  html[data-theme="auto"] .nav-links .submenu li a:hover { color: var(--primary); }
+}
+
+// Manual-toggle "away from the OS default" in auto mode.
+html[data-theme="auto"] .theme-toggle-input:checked ~ .page-wrapper .nav-links li a:hover,
+html[data-theme="auto"] .theme-toggle-input:checked ~ .page-wrapper .nav-links .submenu li a:hover { color: var(--primary); }
+
+// ── Accessibility ────────────────────────────────────────────────────────────
+
+.skip-link {
+  position: absolute;
+  left: -999px;
+  top: 0;
+  z-index: 9999;
+  padding: 0.5rem 1rem;
+  background: var(--primary);
+  color: #fff;
+  border-radius: 0 0 6px 0;
+  text-decoration: none;
+
+  &:focus {
+    left: 0;
+  }
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// ── Print stylesheet ─────────────────────────────────────────────────────────
+
+@media print {
+  .site-header,
+  .site-footer,
+  .theme-toggle-btn,
+  .nav-toggle-label,
+  .hero-actions,
+  .hero-badge,
+  .entry-btn-row,
+  .to-the-top {
+    display: none;
+  }
+
+  .page-wrapper {
+    background: none;
+  }
+
+  body {
+    color: #000;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+// ── Home page skeleton ───────────────────────────────────────────────────────
+// The theme provides generic homepage-cards used by sites' index.html, plus
+// guarded recap styles for the quickstart section.
+
+.quickstart {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 3rem 2rem 0;
+  text-align: center;
+}
+
+.qs-title {
+  font-size: $h5;
+  font-family: $font-display;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 1.5rem;
+}
+
+.qs-pills {
+  display: flex;
+  justify-content: center;
+
+  details {
+    flex: 1;
+    max-width: 14rem;
+
+    summary {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.5rem 1.25rem;
+      font-size: $small-font-size;
+      font-weight: 600;
+      color: var(--text-muted);
+      background: transparent;
+      border: 1px solid var(--border);
+      cursor: pointer;
+      user-select: none;
+      list-style: none;
+      transition: all 0.15s ease;
+
+      &::-webkit-details-marker { display: none; }
+      &::marker { display: none; content: ""; }
+
+      &:hover {
+        color: var(--text);
+        border-color: var(--accent);
+      }
+
+      &:active { transform: scale(0.97); }
+    }
+
+    &:first-of-type summary { border-radius: 999px 0 0 999px; }
+    &:last-of-type summary  { border-radius: 0 999px 999px 0; }
+    & + details summary     { margin-left: -1px; }
+
+    &[open] summary {
+      color: var(--bg);
+      background: var(--primary);
+      border-color: var(--primary);
+      z-index: 1;
+      position: relative;
+    }
+  }
+}
+
+.qs-bodies {
+  margin-top: 1rem;
+}
+
+.qs-step-body {
+  display: none;
+}
+
+.qs-pills:has(details:nth-of-type(1)[open]) + .qs-bodies .qs-step-body:nth-of-type(1),
+.qs-pills:has(details:nth-of-type(2)[open]) + .qs-bodies .qs-step-body:nth-of-type(2),
+.qs-pills:has(details:nth-of-type(3)[open]) + .qs-bodies .qs-step-body:nth-of-type(3) { display: block; }
+
+.qs-step-comment {
+  margin: 0 0 0.75rem;
+  font-size: $body-font-size;
+  color: var(--text-muted);
+  line-height: 1.5;
+}
+
+.qs-sub {
+  margin-top: 2rem;
+  font-size: $body-font-size;
+  color: var(--text-muted);
+
+  a { color: var(--primary); }
+}

@@ -1,0 +1,42 @@
+{{ define "main" }}
+{{- $images := .Resources.ByType "image" -}}
+{{- with .Params.image }}{{ $images = slice (resources.Get .) }}{{ end -}}
+{{- $maxH := site.Params.use_cases.image_max_height.full | default 500 -}}
+{{- if gt (len $images) 0 }}
+<figure class="usecase-featured">
+  {{- /* The featured image is a height-capped, contained block (capped at $maxH),
+         so it never fills a 100vw column. Generate srcset variants that match the
+         rendered width instead of wasteful 640–1600px sizes: a spread around the
+         capped height (with a 2× retina bump), so the browser downloads only what
+         it actually displays. */ -}}
+  {{- $cap  := int $maxH -}}
+  {{- $img  := index $images 0 -}}
+  {{- /* Displayed (contained) size: natural aspect ratio, capped at $maxH tall.
+         The source below the cap renders at its intrinsic size, so everything
+         (width/height, sizes, srcset) is derived from this true rendered width,
+         never from the cap alone — otherwise small sources over-fetch or letterbox. */ -}}
+  {{- $dH := math.Min $cap $img.Height -}}
+  {{- $dW := int (mul (div (float $img.Width) $img.Height) $dH) -}}
+  {{- $w1 := div (mul $dW 3) 4 -}}   {{- /* 0.75× displayed width */ -}}
+  {{- $w2 := $dW -}}                 {{- /* 1× */ -}}
+  {{- $w3 := mul $dW 2 -}}           {{- /* 2× (retina) */ -}}
+  {{- $s := partial "srcset.html" (dict "image" $img "widths" (slice $w1 $w2 $w3) "sizes" (printf "%dpx" $dW)) }}
+  {{- with $s }}
+  <img src="{{ .src }}" srcset="{{ .srcset }}" sizes="{{ .sizes }}"
+    width="{{ $dW }}" height="{{ $dH }}"
+    style="max-height: {{ $maxH }}px;"
+    alt="{{ $.Title }}"
+    fetchpriority="high"
+    decoding="async">
+  {{- end }}
+</figure>
+{{ end }}
+<article class="entry-content">
+  {{ .Content }}
+</article>
+{{ with .Parent }}
+<nav class="secnav">
+  <a href="{{ .RelPermalink }}">← All {{ .Title }}</a>
+</nav>
+{{ end }}
+{{ end }}

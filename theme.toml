@@ -1,0 +1,21 @@
+name = "apodixis"
+license = "MIT"
+licenselink = "https://github.com/GlassOfWhiskey/apodixis-hugo-theme/blob/main/LICENSE"
+description = "A clean, accessible Hugo theme for open-source research projects."
+homepage = "https://github.com/GlassOfWhiskey/apodixis-hugo-theme"
+version = "0.1.0"
+min_version = "0.135.0"
+
+tags = ["academic", "publications", "people", "blog", "research"]
+
+features = [
+  "dark mode",
+  "responsive",
+  "publications list",
+  "people grid",
+  "JSON-LD structured data",
+]
+
+[author]
+name = "Iacopo Colonnelli"
+homepage = "https://glassofwhiskey.github.io"

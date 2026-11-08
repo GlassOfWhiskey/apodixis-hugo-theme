@@ -1,0 +1,7 @@
+{{ define "main" }}
+{{ partial "homepage-cards.html" site.Params.homepage_cards }}
+
+{{ partial "quickstart.html" (dict "data" site.Params.quickstart) }}
+
+{{ partial "homepage-after.html" . }}
+{{ end }}

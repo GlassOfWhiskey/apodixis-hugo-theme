@@ -1,0 +1,23 @@
+# ── Build output ────────────────────────────────────────────────────────────
+/public/
+/resources/
+/exampleSite/.hugo_build.lock
+/exampleSite/public/
+/exampleSite/resources/
+
+# ── Python / pipeline helpers ───────────────────────────────────────────────
+*.pyc
+__pycache__/
+.venv/
+uv.lock
+
+# ── OS / editor ────────────────────────────────────────────────────────────
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# ── Local-only convenience (see README) ────────────────────────────────────
+# The exampleSite references the theme as `themes/apodixis`; a local symlink
+# makes `hugo` inside exampleSite resolve it without installing first.
+/exampleSite/themes/

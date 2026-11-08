@@ -1,0 +1,53 @@
+<header class="site-header">
+  <input type="checkbox" id="nav-toggle" class="nav-toggle-input">
+  <nav class="nav">
+    <a href="/" class="nav-brand">
+      {{ partial "brand-logo.html" . }}
+    </a>
+    <div class="nav-right">
+      <ul class="nav-links">
+        {{ $currentPage := . }}
+        {{ range site.Menus.main }}
+        {{ if .HasChildren }}
+        <li class="has-children">
+          {{ if $currentPage.IsMenuCurrent .Menu . }}
+            <a class="current" aria-haspopup="true" aria-current="page" href="{{ .URL }}">{{ .Name }}</a>
+          {{ else if and (ne .Name "Home") ($currentPage.HasMenuCurrent .Menu .) }}
+            <a class="ancestor" aria-haspopup="true" aria-current="true" href="{{ .URL }}">{{ .Name }}</a>
+          {{ else }}
+            <a aria-haspopup="true" href="{{ .URL }}">{{ .Name }}</a>
+          {{ end }}
+          <ul class="submenu">
+            {{ range .Children }}
+            <li><a href="{{ .URL }}">{{ .Name }}</a></li>
+            {{ end }}
+          </ul>
+        </li>
+        {{ else }}
+        <li>
+          {{ if $currentPage.IsMenuCurrent .Menu . }}
+            <a class="current" aria-current="page" href="{{ .URL }}">{{ .Name }}</a>
+          {{ else if and (ne .Name "Home") ($currentPage.HasMenuCurrent .Menu .) }}
+            <a class="ancestor" aria-current="true" href="{{ .URL }}">{{ .Name }}</a>
+          {{ else }}
+            <a href="{{ .URL }}">{{ .Name }}</a>
+          {{ end }}
+        </li>
+        {{ end }}
+        {{ end }}
+      </ul>
+      <label for="nav-toggle" class="nav-toggle-label">
+        <span class="sr-only">Toggle navigation menu</span>
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        <svg class="nav-toggle-close" xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </label>
+      {{ if eq (site.Params.theme_mode | default "auto") "auto" }}
+      <label for="dark-mode" class="theme-toggle-btn">
+        <span class="sr-only">Toggle dark/light mode</span>
+        <svg class="icon-moon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9z"/></svg>
+        <svg class="icon-sun" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41"/></svg>
+      </label>
+      {{ end }}
+    </div>
+  </nav>
+</header>

@@ -1,0 +1,113 @@
+{{- $site := site -}}
+{{- $page := . -}}
+{{- $base := $site.BaseURL -}}
+{{- $lang := or $site.Language.Locale "en" -}}
+{{- $name := "" -}}
+{{- if $page.IsHome -}}{{- $name = $site.Title -}}{{- else -}}{{- $name = $page.Title -}}{{- end -}}
+
+{{- $crumbs := slice -}}
+{{- $crumbs = $crumbs | append (dict "position" 1 "name" "Home" "item" (absURL "/")) -}}
+{{- range $page.Ancestors.Reverse -}}
+  {{- if not .IsHome -}}
+    {{- $crumbs = $crumbs | append (dict "position" (add (len $crumbs) 1) "name" .LinkTitle "item" .Permalink) -}}
+  {{- end -}}
+{{- end -}}
+{{- if not $page.IsHome -}}
+  {{- $crumbs = $crumbs | append (dict "position" (add (len $crumbs) 1) "name" $page.Title "item" $page.Permalink) -}}
+{{- end -}}
+
+{{- $showSameAs := or $page.IsHome (and (eq $page.Kind "section") (eq $page.Section "about")) -}}
+{{- $graph := slice -}}
+{{- $graph = $graph | append (dict
+  "@type" "WebSite"
+  "@id" (print $base "#website")
+  "name" $site.Title
+  "url" $base
+  "description" $site.Params.description
+  "inLanguage" $lang
+  "publisher" (dict "@id" (print $base "#organization"))
+) -}}
+
+{{- /* Organization logo + contact / sameAs links, driven by params. */ -}}
+{{- $og := $site.Params.og_image | default "/images/logos/logo-1200-630.png" -}}
+{{- $orgSameAs := slice -}}
+{{- range (slice "github" "pypi" "dockerhub" "email" "orcid" "website") -}}
+  {{- if index $site.Params.social . -}}
+    {{- $orgSameAs = $orgSameAs | append (index $site.Params.social .) -}}
+  {{- end -}}
+{{- end -}}
+{{- $org := dict
+  "@type" "Organization"
+  "@id" (print $base "#organization")
+  "name" $site.Title
+  "url" $base
+  "logo" (dict "@type" "ImageObject" "url" (absURL $og) "width" 1200 "height" 630)
+-}}
+{{- with $site.Params.email -}}{{- $org = merge $org (dict "email" .) -}}{{- end -}}
+{{- if and $showSameAs (gt (len $orgSameAs) 0) -}}
+  {{- $org = merge $org (dict "sameAs" $orgSameAs) -}}
+{{- end -}}
+{{- $graph = $graph | append $org -}}
+
+{{- /* CollectionPage sections, configurable via params (default: publications, people). */ -}}
+{{- $collectionSections := $site.Params.collection_sections | default (slice "publications" "people") -}}
+{{- $webType := "WebPage" -}}
+{{- if and (eq $page.Kind "section") (in $collectionSections $page.Section) -}}{{- $webType = "CollectionPage" -}}{{- end -}}
+{{- $webPage := dict
+  "@type" $webType
+  "@id" $page.Permalink
+  "name" $name
+  "url" $page.Permalink
+  "description" $page.Description
+  "isPartOf" (dict "@id" (print $base "#website"))
+  "inLanguage" $lang
+-}}
+{{- if eq $page.Kind "page" -}}
+  {{- $webPage = merge $webPage (dict "author" (dict "@id" (print $base "#organization"))) -}}
+  {{- if not $page.Date.IsZero -}}
+    {{- $webPage = merge $webPage (dict "datePublished" $page.Date) -}}
+  {{- end -}}
+{{- end -}}
+{{- if and (eq $page.Kind "section") (eq $page.Section "people") -}}
+  {{- $peopleRefs := slice -}}
+  {{- range hugo.Data.people.members -}}
+    {{- $id := print $page.Permalink "#person-" (urlize .name) -}}
+    {{- $same := slice -}}
+    {{- if .orcid -}}{{- $same = $same | append (print "https://orcid.org/" .orcid) -}}{{- end -}}
+    {{- if .google_scholar -}}{{- $same = $same | append (print "https://scholar.google.com/citations?user=" .google_scholar) -}}{{- end -}}
+    {{- $graph = $graph | append (dict
+      "@type" "Person"
+      "@id" $id
+      "name" .name
+      "jobTitle" .role
+      "url" .website
+      "image" (absURL .photo)
+      "sameAs" $same
+      "memberOf" (dict "@id" (print $base "#organization"))
+    ) -}}
+    {{- $peopleRefs = $peopleRefs | append (dict "@id" $id) -}}
+  {{- end -}}
+  {{- $webPage = merge $webPage (dict "hasPart" $peopleRefs) -}}
+{{- end -}}
+{{- $graph = $graph | append $webPage -}}
+
+{{- $list := slice -}}
+{{- range $c := $crumbs -}}
+  {{- $list = $list | append (dict
+    "@type" "ListItem"
+    "@id" (printf "%s#crumb%d" $c.item $c.position)
+    "position" $c.position
+    "name" $c.name
+    "item" $c.item
+  ) -}}
+{{- end -}}
+{{- $graph = $graph | append (dict
+  "@type" "BreadcrumbList"
+  "@id" (print $page.Permalink "#breadcrumb")
+  "itemListElement" $list
+) -}}
+
+{{- $doc := dict "@context" "https://schema.org" "@graph" $graph -}}
+<script type="application/ld+json">
+{{- $doc | jsonify (dict "indent" "  " "noHTMLEscape" true) | safeJS -}}
+</script>

@@ -1,0 +1,22 @@
+// ── apodixis Hugo theme – theme variables (override me) ──────────────────────
+// This is the PUBLIC, site-overridable variables file. Copy it into your own
+// site's `assets/css/variables.scss` and edit the values there — Hugo's asset
+// pipeline resolves the site copy before the theme's, so per-site overrides
+// "just work" (exactly like `extra.scss`).
+
+// It loads the defaults from the `_variables` partial and re-emits them into
+// `:root` (as `--*` light vars and `--dark-*` dark vars). To override, copy this
+// file, edit the maps below (or add keys), and the emitted `:root` reflects it.
+@use "variables" as *;
+
+// Emit the palette into :root. This file is transpiled by partials/head.html
+// (resolving the site's copy when present) and concatenated first into the
+// bundled `main.css`, so its `:root` values always precede theme + site rules.
+:root {
+  @each $k, $v in $defaults {
+    --#{$k}: #{$v};
+  }
+  @each $k, $v in $dark-defaults {
+    --dark-#{$k}: #{$v};
+  }
+}

@@ -1,0 +1,73 @@
+{{- /* srcset.html — responsive image variant URLs for a Hugo image resource.
+  Returns a dict (or false) so callers can place `src`/`srcset`/`sizes` into an
+  <img>/<source> as ordinary (properly-escaped) template attributes:
+
+      {{- $v := partial "srcset.html" (dict "image" $img "widths" (slice 320 640 960) "height" 180 "sizes" "100vw") }}
+      {{- with $v }}
+      <img src="{{ .src }}" srcset="{{ .srcset }}" sizes="{{ .sizes }}" alt="...">
+      {{- end }}
+
+  Fields:
+    image  – Hugo image resource (page-bundle resource or assets/ global).
+    widths – slice of ints, widths in px to generate (default [320 640 1024 1600]).
+    height – optional int. When given, every variant is cropped with `.Fill` to
+             `width × height` (constant aspect ratio — use for fixed-frame cards).
+             When omitted, variants keep their natural ratio via `.Resize`.
+    sizes  – optional sizes="" media hint passed through (e.g. "100vw").
+
+  Returns dict{src, srcset, sizes, width, height} for raster images.
+  SVG/unsupported images return dict{src, srcset:"", sizes:"", width:"",
+  height:""}; a missing/nil image returns false. `width`/`height` are the
+  intrinsic dimensions (in px) of the default `src` variant, for CLS-safe
+  `width`/`height` attributes.
+*/ -}}
+{{- $image := .image -}}
+{{- $widths := .widths | default (slice 320 640 1024 1600) -}}
+{{- $height := .height | default 0 -}}
+{{- $sizes := .sizes | default "" -}}
+
+{{- $src := "" -}}
+{{- $srcset := "" -}}
+{{- $width := "" -}}
+{{- $heightOut := "" -}}
+{{- $ok := false -}}
+
+{{- if and $image (ne $image.MediaType.SubType "svg") -}}
+  {{- $parts := slice -}}
+  {{- $lastW := 0 -}}
+  {{- $default := "" -}}
+  {{- range $widths -}}
+    {{- $w := . -}}
+    {{- $variant := "" -}}
+    {{- if gt $height 0 -}}
+      {{- $variant = $image.Fill (printf "%dx%d" $w $height) -}}
+    {{- else -}}
+      {{- $variant = $image.Resize (printf "%dx" $w) -}}
+    {{- end -}}
+    {{- $parts = $parts | append (printf "%s %dw" $variant.RelPermalink $w) -}}
+    {{- $lastW = $w -}}
+  {{- end -}}
+  {{- $srcset = delimit $parts ", " -}}
+  {{- /* Default src: the largest generated variant (used when srcset/sizes
+         aren't supported) — always a real, processed file, not the original. */ -}}
+  {{- if gt $height 0 -}}
+    {{- $default = $image.Fill (printf "%dx%d" $lastW $height) -}}
+  {{- else -}}
+    {{- $default = $image.Resize (printf "%dx" $lastW) -}}
+  {{- end -}}
+  {{- $src = $default.RelPermalink -}}
+  {{- $width = $default.Width -}}
+  {{- $heightOut = $default.Height -}}
+  {{- $ok = true -}}
+{{- else if $image -}}
+  {{- /* Non-raster (e.g. SVG): emit verbatim, no srcset. */ -}}
+  {{- $src = $image.RelPermalink -}}
+  {{- $ok = true -}}
+{{- end -}}
+
+{{- $result := false -}}
+{{- if $ok -}}
+  {{- $result = dict "src" $src "srcset" $srcset "sizes" $sizes "width" $width "height" $heightOut -}}
+{{- end -}}
+
+{{- return $result -}}

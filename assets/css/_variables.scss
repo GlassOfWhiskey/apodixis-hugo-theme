@@ -1,0 +1,60 @@
+// ── apodixis Hugo theme – default palette maps (internal partial) ────────────
+// This partial holds the DEFAULT palette maps. It is consumed by:
+//   • `variables.scss` — the PUBLIC, site-overridable file that emits `:root`.
+//   • `main.scss`      — via `@use "variables" as *` for its dark/light mixins.
+// Because it is an underscore-prefixed partial it emits no CSS of its own, so
+// the `:root` block is emitted exactly once (from `variables.scss`).
+
+//   • $defaults       → `:root` `--<key>: <value>` (light mode)
+//   • $dark-defaults  → `:root` `--dark-<key>: <value>` (dark)
+// The theme's `dark-theme` mixin maps every surfaced `--*` variable from its
+// `--dark-*` counterpart, so overriding a `--dark-*` variable lands everywhere
+// dark mode is active — OS-dark switch, manual toggle, or a forced theme_mode.
+
+// ── Light palette (defaults) ─────────────────────────────────────────────────
+// Defaults mirror the vpoline RISC-V palette so the theme works standalone.
+$defaults: (
+  "bg": #f7f9fc,
+  "bg-card": #eef1f7,
+  "bg-alt": #e7ebf3,
+  "text": #1a1d24,
+  "text-muted": #5c6470,
+  "border": #dfe3ea,
+  "hero-start": #003262,
+  "hero-end": #0a4d85,
+  "primary": #003262,
+  "accent": #fdb515,
+  "success": #2ea043,
+  // Publication type colors, matching the reference site glassofwhiskey.github.io.
+  // A single `--pubtype-*` variable per type is shared by the per-entry badge and
+  // the legend swatch. These are theme-invariant (defined only in :root; the
+  // dark-theme mixin does not override them) so both read identically in light
+  // and dark mode:
+  //   journal      → #c32b72
+  //   conference   → #196ca3
+  //   book         → #ef942d
+  //   poster       → #626a70
+  //   thesis       → #f8c91f
+  "pubtype-journal": #c32b72,
+  "pubtype-conference": #196ca3,
+  "pubtype-book": #ef942d,
+  "pubtype-poster": #626a70,
+  "pubtype-thesis": #f8c91f,
+  "btn-bg": #ffffff,
+  "btn-text": #5a606a,
+);
+
+// ── Dark palette (defaults) ──────────────────────────────────────────────────
+$dark-defaults: (
+  "bg": #0d1016,
+  "bg-card": #151a23,
+  "bg-alt": #1a202b,
+  "text": #e2e7ef,
+  "text-muted": #838d9c,
+  "border": #242b36,
+  "primary": #fdb515,
+  "accent": #73c5c6,
+  "success": #2ea043,
+  "btn-bg": #1a202b,
+  "btn-text": #e2e7ef,
+);

@@ -1,0 +1,23 @@
+{{ $title := .title | default "terminal" }}
+{{ $code := .code | default "" }}
+{{/* Prompt handling: a missing prompt falls back to "$" (the default shell
+     prompt); an EXPLICITLY empty `prompt: ""` removes the prompt entirely so a
+     step can render bare output text without a `$` prefix. */}}
+{{ $prompt := .prompt }}
+{{ $showPrompt := true }}
+{{ if eq $prompt nil }}
+  {{ $prompt = "$" }}
+{{ else if eq $prompt "" }}
+  {{ $showPrompt = false }}
+{{ end }}
+<div class="qs-term-pane">
+  <div class="qs-term-bar">
+    <span class="qs-term-dot qs-dot-red"></span>
+    <span class="qs-term-dot qs-dot-yellow"></span>
+    <span class="qs-term-dot qs-dot-green"></span>
+    <span class="qs-term-title">{{ $title }}</span>
+  </div>
+  <div class="qs-term-body">
+    <pre><code>{{ if $showPrompt }}<span class="qs-prompt">{{ $prompt }}</span> {{ end }}{{ $code }}</code></pre>
+  </div>
+</div>

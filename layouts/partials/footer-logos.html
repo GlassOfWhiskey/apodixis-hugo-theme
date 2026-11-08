@@ -1,0 +1,51 @@
+{{- /* Overridable hook: renders the sponsor/institution logos shown in the footer.
+  Override this partial in your site to drop in your own logo markup.
+
+  Default iterates optional .Site.Params.footer_logos. Each entry supports:
+    logo      string | {light, dark}   path(s) to a logo. Either a plain string
+                       (shared across light & dark) or a dict with `light`/`dark`
+                       variants. Two rendering modes:
+                         • Inline image — a `.svg` under the site's `assets/images/`
+                           is inlined verbatim, or a `.png` is rendered as an
+                           <img> (see `partials/logo-img.html`). Use `width` to
+                           size it; height scales from the image's intrinsic ratio.
+                         • Masked image (legacy monochrome) — any image URL (PNG/
+                           SVG), masked into the current text color. Detect it by
+                           also giving `height` (and optional `width`).
+                       The deprecated `logo_dark` still supplies the dark variant
+                       when `logo` is a string.
+    label, url string  link text / target (rel=noopener always added).
+    width   int        optional CSS width (inline SVG) or mask width (masked).
+    height  int        sets masked-image mode; mask height.
+
+  The default SVG is wrapped in .footer-logo-mark; an optional dark variant in
+  .footer-logo-mark--dark. When both are present the link gets .footer-logo--dual
+  and main.scss swaps them via the `theme-swap` mixin (OS-dark + manual toggle).
+  Icons are inlined at build time so `currentColor` and CSS vars flow through.
+*/ -}}
+<span class="footer-logos">
+  {{- range .Site.Params.footer_logos -}}
+    {{- $logo := "" -}}
+    {{- $logoDark := "" -}}
+    {{- if reflect.IsMap .logo -}}
+      {{- $logo = .logo.light | default "" -}}
+      {{- $logoDark = .logo.dark | default "" -}}
+    {{- else -}}
+      {{- $logo = .logo | default "" -}}
+      {{- $logoDark = .logo_dark | default $logo -}}
+    {{- end -}}
+    {{- if and $logo .height -}}
+    {{- /* Masked-image mode for monochrome logos (PNG/SVG by URL), keyed on `height`. */ -}}
+    {{- $maskStyle := printf "-webkit-mask-image:url(%s);mask-image:url(%s)" (print $.Site.BaseURL $logo) (print $.Site.BaseURL $logo) -}}
+    {{- if .width }}{{ $maskStyle = printf "width:%vpx;%s" .width $maskStyle }}{{ end -}}
+    {{- if .height }}{{ $maskStyle = printf "height:%vpx;%s" .height $maskStyle }}{{ end -}}
+    <a href="{{ .url }}" target="_blank" rel="noopener" aria-label="{{ .label }}" class="footer-logo" style="{{ $maskStyle | safeCSS }}"></a>
+    {{- else if $logo -}}
+    <a href="{{ .url }}" target="_blank" rel="noopener" aria-label="{{ .label }}" class="footer-logo footer-logo--svg{{ if $logoDark }} footer-logo--dual{{ end }}"
+       {{ with .width }}style="{{ (printf "width:%vpx;" .) | safeCSS }}"{{ end }}>
+      <span class="footer-logo-mark">{{ partial "logo-img.html" (dict "path" $logo) }}</span>
+      {{- if $logoDark }}<span class="footer-logo-mark footer-logo-mark--dark">{{ partial "logo-img.html" (dict "path" $logoDark) }}</span>{{ end -}}
+    </a>
+    {{- end -}}
+  {{- end -}}
+</span>

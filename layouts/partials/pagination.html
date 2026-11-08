@@ -1,0 +1,20 @@
+{{- /* pagination.html — pager navigation for a Hugo Paginator.
+  Renders a previous / page-numbers / next bar; outputs nothing when there is
+  only one page. Takes the paginator as its context.
+*/ -}}
+{{- $p := . -}}
+{{- if gt $p.TotalPages 1 -}}
+<nav class="pagination" aria-label="Pagination">
+  <div class="pagination-left">
+    {{ if $p.HasPrev }}<a class="pagination-link" href="{{ $p.Prev.URL }}">← Prev</a>{{ end }}
+  </div>
+  <div class="pagination-center">
+    {{ range $p.Pagers }}
+    <a class="pagination-link pagination-number{{ if eq .PageNumber $p.PageNumber }} pagination-active{{ end }}" href="{{ .URL }}">{{ .PageNumber }}</a>
+    {{ end }}
+  </div>
+  <div class="pagination-right">
+    {{ if $p.HasNext }}<a class="pagination-link" href="{{ $p.Next.URL }}">Next →</a>{{ end }}
+  </div>
+</nav>
+{{- end -}}

@@ -1,0 +1,62 @@
+{{- /* Reusable quickstart component.
+  Renders the homepage "quickstart" section (title, step pills, terminal panes,
+  optional footer link) from a configuration map. Configuration precedence:
+    1. An explicit data dict passed as the partial context, if it has a `steps` key.
+    2. Otherwise `site.Params.quickstart`.
+
+  Homepage templates typically call it as:
+      {{ partial "quickstart.html" site.Params.quickstart }}
+  or, when nothing is configured, it renders nothing.
+
+  Expected schema (all optional except `steps`):
+    title   string           section heading (default "Quickstart")
+    steps   []{              ordered steps shown as pills + terminal panes
+      label    string        pill label
+      comment  string        short line shown above the terminal; raw inline HTML
+                             is supported (use safeHTML)
+      terminal {             overrides for the terminal pane (see terminal.html)
+        title                optional pane title
+        prompt               optional shell prompt; defaults to "$". Set an
+                             explicitly empty string ("") to render the code
+                             with no prompt prefix.
+        code                 optional code line(s)
+      }
+    }
+    footer  {                optional call-to-action line under the steps
+      html string   raw inline HTML (links, spans, etc.), wrapped in .qs-sub.
+                    Use safeHTML on the value so markdown/entities render.
+    }
+*/ -}}
+
+{{- $cfg := .data -}}
+{{- if not (and $cfg (index $cfg "steps")) -}}
+  {{- $cfg = site.Params.quickstart -}}
+{{- end -}}
+{{- if not (index $cfg "steps") -}}
+  {{- /* nothing configured → render nothing */ -}}
+{{- else -}}
+  {{- $title := index $cfg "title" | default "Quickstart" -}}
+  {{- $steps := index $cfg "steps" -}}
+  <div class="quickstart">
+    <h2 class="qs-title">{{ $title }}</h2>
+
+    <div class="qs-pills">
+      {{- range $i, $s := $steps -}}
+      <details name="qs-steps"{{ if eq $i 0 }} open{{ end }}><summary>{{ index $s "label" }}</summary></details>
+      {{- end -}}
+    </div>
+
+    <div class="qs-bodies">
+      {{- range $i, $s := $steps -}}
+      <div class="qs-step-body">
+        {{- with index $s "comment" }}<p class="qs-step-comment">{{ . | safeHTML }}</p>{{ end -}}
+        {{- partial "terminal.html" (index $s "terminal") -}}
+      </div>
+      {{- end -}}
+    </div>
+
+    {{- with index $cfg "footer" -}}
+    <p class="qs-sub">{{ index . "html" | safeHTML }}</p>
+    {{- end -}}
+  </div>
+{{- end -}}

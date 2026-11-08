@@ -1,0 +1,26 @@
+{{- /* Inlines an SVG file into the page, verbatim.
+  Accepts a `dict` with:
+    path  string  filesystem path to an SVG under the site's `assets/` directory
+                  (e.g. "/images/icons/about.svg"). Files in `assets/` exist only
+                  for Hugo's pipeline — they are NOT copied to the built site —
+                  which suits SVGs that are inlined and never referenced
+                  standalone. The `static/` readFile below is kept as a fallback
+                  for sites that still ship SVGs as static files.
+
+  NO classes are injected: the SVG stays plain stroke="currentColor"/fill markup
+  so theme CSS can style it purely via a wrapping element (e.g. inherited color
+  or a `.hp-icon` / `.footer-logo--svg` span). Renders nothing when the file
+  cannot be resolved.
+*/ -}}
+
+{{- $path := .path | default "" -}}
+{{- $rel := strings.TrimPrefix "/" $path -}}
+{{- $svg := "" -}}
+{{- with readFile (printf "static/%s" $rel) -}}
+  {{- $svg = . -}}
+{{- else -}}
+  {{- with resources.Get $rel -}}{{/* assets/ */ -}}
+    {{- $svg = .Content -}}
+  {{- end -}}
+{{- end -}}
+{{- if $svg -}}{{- $svg | safeHTML -}}{{- end -}}

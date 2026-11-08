@@ -1,0 +1,170 @@
+baseURL: "https://example.org"
+locale: "en-us"
+title: "Example Project"
+theme: "apodixis"
+
+disableKinds:
+  - taxonomy
+  - term
+  - rss
+
+# ── Content types ────────────────────────────────────────────────────────────
+# The theme provides list templates for the `publications` and `people`
+# sections (rendered from data files). Create one content page per section.
+
+menus:
+  main:
+    - name: "Home"
+      url: "/"
+      weight: 1
+    - name: "About"
+      url: "/about"
+      weight: 2
+    - name: "Publications"
+      url: "/publications"
+      weight: 3
+    - name: "People"
+      url: "/people"
+      weight: 4
+    - name: "Use Cases"
+      url: "/use-cases"
+      weight: 5
+    - name: "Documentation"
+      url: "https://example.org/docs"
+      weight: 6
+
+params:
+  # Hero + meta
+  subtitle: "Example Project — a thought-provoking tagline"
+  description: "A short one-sentence description of the project."
+
+  # ── Theme ────────────────────────────────────────────────────────────────
+  # theme_mode: how the site picks light/dark.
+  #   auto   (default) follow the OS/browser preference; the header toggle
+  #          flips to the opposite of the OS preference.
+  #   dark   force dark mode.
+  #   light  force light mode.
+  # NOTE: brand colours are no longer configured here. They (and the dark
+  # palette) live in the site's `assets/css/variables.scss` — copy the theme's
+  # variables.scss and edit the `$defaults` / `$dark-defaults` maps.
+  theme_mode: "auto"
+
+  # ── Assets (paths are relative to static/) ───────────────────────────────
+  og_image: "/images/logos/logo-1200-630.png"
+  twitter_image: "/images/logos/logo-1200-675.png" # Twitter/X summary card (16:9)
+  favicon_16: "/images/logos/logo-16x16.png"
+  favicon_32: "/images/logos/logo-32x32.png"
+  # Header logo (via partials/brand-logo.html). Either a dict with `light`/`dark`
+  # variants, or a plain string (same logo for both modes). `logo_white` is
+  # deprecated: only used to supply the dark variant when `logo` is a string.
+  logo:
+    light: "/images/logos/logo.svg"
+    dark: "/images/logos/logo-white.svg"
+
+  # ── Social / organisation links (used in footer icons + JSON-LD) ─────────
+  # `github` also drives the homepage hero's GitHub button + live star-count
+  # badge (from shields.io), as on the source sites.
+  social:
+    email: "team@example.org"
+    github: "https://github.com/GlassOfWhiskey/apodixis-hugo-theme"
+    pypi: "https://pypi.org/project/example/"
+    dockerhub: "https://hub.docker.com/r/example/example"
+    orcid: ""                                  # omit keys you don't want
+
+  # ── JSON-LD ───────────────────────────────────────────────────────────────
+  # Sections upgraded to schema.org CollectionPage in structured data.
+  collection_sections: ["publications", "people"]
+
+  # ── Hero action buttons (optional) ────────────────────────────────────────
+  hero_actions:
+    - label: "Get started"
+      url: "https://example.org/docs"
+      style: "primary"
+      svg: ""   # optional inline SVG for a leading icon
+
+  # ── Quickstart (optional; rendered by partials/quickstart.html) ───────────
+  # Reusable homepage "quickstart" component: step pills with terminal panes
+  # and an optional footer call-to-action. `steps` is required when you include
+  # the block; everything else falls back to defaults. Each step's `terminal`
+  # may override title/prompt/code (see partials/terminal.html). The prompt
+  # defaults to "$"; set `prompt: ""` on a step to render its code with no
+  # prompt prefix (e.g. plain output text).
+  quickstart:
+    title: "Get started in seconds"
+    steps:
+      - label: "Install"
+        comment: 'Install the <code>example</code> package from <a href="/docs">PyPI</a>.'
+        terminal:
+          title: "example"
+          code: "pip install example"
+      - label: "Run"
+        comment: "Launch a workflow anywhere."
+        terminal:
+          title: "example"
+          code: "example run workflow.yml"
+      - label: "Publish"
+        comment: "Embed images, logos and cards via params & partials."
+        terminal:
+          title: "example"
+          code: "example docs"
+    footer:
+      html: 'Define your workflow once, <a href="/about">execute it anywhere</a>.'
+
+  # ── Homepage cards (optional; rendered by partials/homepage-cards.html) ────
+  # A row of icon + title + text link cards shown under the hero. Configured as:
+  #   homepage_cards:
+  #     icon_size (optional): one size in px applied to EVERY card's icon for
+  #       consistency; omit (or 0) to keep natural SVG sizes.
+  #     cards: each card → title, url, text (string), icon (path to an SVG in
+  #       assets/images/icons, inlined by the theme and styled via the .hp-icon
+  #       span), optional target.
+  homepage_cards:
+    icon_size: 64
+    cards:
+      - title: "About"
+        url: "/about"
+        text: "Learn about the project and its goals."
+        icon: "/images/icons/about.svg"
+      - title: "Publications"
+        url: "/publications"
+        text: "Browse the papers, theses and posters by the group."
+        icon: "/images/icons/publications.svg"
+      - title: "People"
+        url: "/people"
+        text: "Meet the researchers behind the project."
+        icon: "/images/icons/people.svg"
+
+  # ── Use cases section (rendered by layouts/use-cases/list.html) ────────────
+  #   use_cases:
+#     image_max_height:
+#       card (optional): max pixel height of a list card's image, shown at its
+#         full aspect ratio, centered (no cropping). Default: 180.
+#       full (optional): max pixel height of the single page's featured image
+#         (object-fit: contain, no cropping). Default: 500 (matches the data
+#         portal).
+#     pagination:
+#       enabled (optional): whether to split the use-case list across pages.
+#         true (default) paginates; false shows every card on one page.
+#       size (optional): number of use-case cards per page (default: 6).
+  use_cases:
+    image_max_height:
+      card: 180
+      full: 500
+    pagination:
+      enabled: true
+      size: 6
+
+  # ── Footer sponsor logos (optional; iterated by partials/footer-logos.html)
+  # SVG logos live in assets/images and are inlined (no CSS classes in the SVG).
+  # Each entry: label, url, and `logo` — either a dict with `light`/`dark`
+  # variants, or a plain string shared across both modes. The deprecated
+  # `logo_dark` still supplies the dark variant when `logo` is a string.
+  # (Masked-image mode for monochrome PNG/SVG logos: add `height` + optional
+  # `width` to the entry's `logo` path to render it as a mask.)
+  footer_logos:
+    - label: "Example Group"
+      url: "https://example.org"
+      logo:
+        light: "/images/logos/fund/example-light.svg"
+        dark: "/images/logos/fund/example-dark.svg"
+      width: 100

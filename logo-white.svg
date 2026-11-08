@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:xl="http://www.w3.org/1999/xlink" version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="511.1141 699.8698 1166.8715 368" width="1166.8715" height="368">
+  <defs/>
+  <g id="Canvas_1" stroke-opacity="1" fill="none" stroke="none" stroke-dasharray="none" fill-opacity="1">
+    <title>Canvas 1</title>
+    <g id="Canvas_1_Layer_1">
+      <title>Layer 1</title>
+      <g id="Graphic_40">
+        <path d="M 652.632 779.09825 L 651.2358 780.4587 L 514.3273 1016.0554 L 514.1141 1016.8781 L 530.0511 1039.4912 L 681.369 779.09825 Z" fill="#011d2e"/>
+        <path d="M 652.632 779.09825 L 651.2358 780.4587 L 514.3273 1016.0554 L 514.1141 1016.8781 L 530.0511 1039.4912 L 681.369 779.09825 Z" stroke="#6af0f4" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+      </g>
+      <g id="Graphic_41">
+        <path d="M 766.1929 984.2181 L 681.1707 838.8875 L 665.369 863.8437 L 665.53475 865.6962 L 734.8731 984.2181 Z" fill="#011d2e"/>
+        <path d="M 766.1929 984.2181 L 681.1707 838.8875 L 665.369 863.8437 L 665.53475 865.6962 L 734.8731 984.2181 Z" stroke="#5de8ef" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+      </g>
+      <g id="Graphic_42">
+        <path d="M 782.5015 1009.8875 L 793.369 1009.8875 L 812.7985 1009.8875 L 697.3025 805.7489 L 697.35815 805.6525 L 682.02704 779.09825 L 546.5869 1013.6875 L 546.5372 1013.6875 L 530.6867 1040.0671 L 530.26324 1039.8127 L 530.26324 1040.0875 L 797.7952 1040.0875 L 813.4632 1014.0115 L 813.4632 1013.6875 L 577.2491 1013.6875 L 682.00055 832.2527 L 768.3572 984.8875 L 598.48274 984.8875 L 583.569 1009.7081 L 583.569 1009.8875 Z" fill="#011d2e"/>
+        <path d="M 782.5015 1009.8875 L 793.369 1009.8875 L 812.7985 1009.8875 L 697.3025 805.7489 L 697.35815 805.6525 L 682.02704 779.09825 L 546.5869 1013.6875 L 546.5372 1013.6875 L 530.6867 1040.0671 L 530.26324 1039.8127 L 530.26324 1040.0875 L 797.7952 1040.0875 L 813.4632 1014.0115 L 813.4632 1013.6875 L 577.2491 1013.6875 L 682.00055 832.2527 L 768.3572 984.8875 L 598.48274 984.8875 L 583.569 1009.7081 L 583.569 1009.8875 Z" stroke="#5de8ef" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+      </g>
+      <g id="Graphic_43">
+        <text transform="translate(818.4632 704.8698)" fill="white">
+          <tspan font-family="LMRoman10" font-size="253" fill="white" x="29.29217" y="285" xml:space="preserve">podixis</tspan>
+        </text>
+      </g>
+      <g id="Graphic_45"/>
+    </g>
+  </g>
+</svg>

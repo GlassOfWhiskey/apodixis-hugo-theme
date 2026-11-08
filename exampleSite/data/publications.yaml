@@ -1,0 +1,64 @@
+years:
+- year: '2025'
+  entries:
+  - key: smith2025distributed
+    type: paper-conference
+    year: '2025'
+    authors:
+    - given: John
+      family: Smith
+      initials: J.
+      highlight: false
+    - given: Jane
+      family: Doe
+      initials: J.
+      highlight: false
+    title: A distributed workflow engine for modern HPC
+    venue: Proceedings of the International Workshop on Distributed Computing
+    keyword: conference
+    month: Jul.
+    doi: 10.0000/fake.2025.001
+    pages: 195-209
+    publisher_place: New York
+    publisher: ACM
+    bibtex: "@inproceedings{smith2025distributed,\n  author = {Smith, John and Doe,\
+      \ Jane},\n  title = {A Distributed Workflow Engine for Modern {HPC}},\n  booktitle\
+      \ = {Proceedings of the International Workshop on Distributed Computing},\n\
+      \  year = {2025},\n  month = jul,\n  publisher = {ACM},\n  address = {New York},\n\
+      \  pages = {195--209},\n  doi = {10.0000/fake.2025.001},\n}\n"
+- year: '2024'
+  entries:
+  - key: doe2024portable
+    type: article-journal
+    year: '2024'
+    authors:
+    - given: Jane
+      family: Doe
+      initials: J.
+      highlight: false
+    title: Portable workflow descriptions via JSON-LD
+    venue: Journal of Example Computing
+    keyword: journal
+    month: May
+    doi: 10.0000/fake.2024.002
+    volume: '42'
+    pages: 512-530
+    bibtex: "@article{doe2024portable,\n  author = {Doe, Jane},\n  title = {Portable\
+      \ Workflow Descriptions via {JSON-LD}},\n  journal = {Journal of Example Computing},\n\
+      \  year = {2024},\n  volume = {42},\n  number = {3},\n  pages = {512--530},\n\
+      \  month = may,\n  doi = {10.0000/fake.2024.002},\n}\n"
+  - key: smith2024scheduling
+    type: thesis
+    year: '2024'
+    authors:
+    - given: John
+      family: Smith
+      initials: J.
+      highlight: false
+    title: Scheduling dataflows over heterogeneous infrastructures
+    venue: University of Example
+    keyword: thesis
+    thesis_type: Thesis
+    bibtex: "@phdthesis{smith2024scheduling,\n  author = {Smith, John},\n  title =\
+      \ {Scheduling Dataflows over Heterogeneous Infrastructures},\n  school = {University\
+      \ of Example},\n  year = {2024},\n  type = {Ph.D. dissertation},\n}\n"

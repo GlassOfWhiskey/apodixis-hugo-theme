@@ -1,0 +1,31 @@
+// ── Example site extra stylesheet ────────────────────────────────────────────
+// Transpiled alongside the theme's variables.scss/main.scss and CONCATENATED
+// with them into a single bundle that is minified and inlined into a <style>
+// tag in the head (see partials/head.html).
+// Use this for per-project components that are not part of the palette.
+// (Brand colors live in ./variables.scss — the single overridable place.)
+
+// A project-specific component.
+.stats-band {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  margin: 2rem 0;
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+
+  .stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary);
+  }
+
+  .stat-label {
+    display: block;
+    font-size: 0.875rem;
+    color: var(--text-muted);
+  }
+}

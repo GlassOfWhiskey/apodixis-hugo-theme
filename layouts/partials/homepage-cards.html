@@ -1,0 +1,64 @@
+{{- /* Reusable homepage cards component.
+  Renders the homepage "cards" strip (a row of icon + title + text cards) from
+  a configuration map. Configuration precedence:
+    1. `cards` + optional `icon_size` passed as the partial context.
+    2. Otherwise `site.Params.homepage_cards`, whose schema is:
+         homepage_cards:
+           icon_size  int (optional) one size in px applied to EVERY card's
+                      `.hp-icon`; omit (or 0) to keep each icon's natural SVG
+                      size. Used to keep the strip visually consistent.
+           cards      slice of card maps (each list item is one card):
+                       title   string   card heading
+                       url     string (optional) link target (relative or
+                                       absolute). When present, ONLY the icon
+                                       is wrapped in a clickable link (the
+                                       title/text stay static text); hovering
+                                       the icon highlights and moves it. When
+                                       omitted, the icon is static too — the
+                                       card has no links or hover effects.
+                       text    string   short description under the heading
+                       icon    string   path to an SVG under the site's
+                                        `assets/images/icons` (e.g.
+                                        "/images/icons/about.svg"); inlined
+                                        and styled via the `.hp-icon` span.
+                                        No classes added to the SVG itself.
+                       target  string (optional) anchor target (e.g. _blank);
+                                        the partial adds rel="noopener" auto.
+  When nothing is configured, it renders nothing.
+*/ -}}
+
+{{- $cards := .cards -}}
+{{- if not $cards -}}
+  {{- with site.Params.homepage_cards }}{{ $cards = .cards }}{{ end -}}
+{{- end -}}
+
+{{- $iconSize := int (index . "icon_size" | default 0) -}}
+{{- if and (not $iconSize) site.Params.homepage_cards -}}
+  {{- $iconSize = int (site.Params.homepage_cards.icon_size | default 0) -}}
+{{- end -}}
+
+{{- if $cards -}}
+<div class="homepage-cards">
+  <div class="hp-columns">
+    {{- range $cards -}}
+    {{- $card := . -}}
+    {{- $title := index $card "title" -}}
+    {{- $hasURL := (index $card "url") -}}
+    <div class="hp-card">
+      <span class="hp-icon"{{ if gt $iconSize 0 }} style="{{ (printf "width:%vpx;" $iconSize) | safeCSS }}"{{ end }}>
+        {{- if $hasURL -}}
+        {{- /* Only the icon is a clickable link; hovering highlights/moves the icon. */ -}}
+        <a class="hp-icon-link" href="{{ $hasURL }}"{{ with index $card "target" }} target="{{ . }}" rel="noopener"{{ end }}>
+        {{- end -}}
+        {{- partial "homepage-cards/icon.html" (dict "path" (index $card "icon")) -}}
+        {{- if $hasURL -}}
+        </a>
+        {{- end -}}
+      </span>
+      <h2>{{ $title }}</h2>
+      {{- with index $card "text" }}<p>{{ . }}</p>{{ end -}}
+    </div>
+    {{- end -}}
+  </div>
+</div>
+{{- end -}}

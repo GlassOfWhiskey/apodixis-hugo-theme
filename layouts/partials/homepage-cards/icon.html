@@ -1,0 +1,10 @@
+{{- /* Homepage card icon renderer.
+  Accepts a `dict` with:
+    path  string  filesystem path to an SVG icon under the site's `assets/`
+                  directory (e.g. "/images/icons/about.svg").
+
+  Thin wrapper around the shared partials/inline-svg.html: the SVG is inlined
+  verbatim, with NO classes injected (icons stay plain stroke="currentColor"
+  markup) so the theme styles them purely via the wrapping `.hp-icon` span.
+*/ -}}
+{{- partial "inline-svg.html" . -}}

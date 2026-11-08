@@ -1,0 +1,45 @@
+{{ define "main" }}
+{{- $paginationEnabled := site.Params.use_cases.pagination.enabled | default true -}}
+{{- $paginationSize   := site.Params.use_cases.pagination.size | default 6 -}}
+{{- $imgMaxH          := site.Params.use_cases.image_max_height.card | default 180 -}}
+{{- $pages   := .Pages -}}
+{{- $paginator := "" -}}
+{{- if $paginationEnabled -}}
+  {{- $paginator = .Paginate $pages $paginationSize -}}
+  {{- $pages = $paginator.Pages -}}
+{{- end -}}
+{{ with $paginator }}{{ partial "pagination.html" . }}{{ end }}
+<div class="usecase-grid">
+  {{ range $pages }}
+  {{- $img := index (.Resources.ByType "image") 0 -}}
+  {{- with .Params.image }}{{ $img = resources.Get . }}{{ end -}}
+  {{- $summary := .Params.summary | default .Summary -}}
+  {{- $title := .Title -}}
+  <article class="usecase-card">
+    <a class="usecase-card-link" href="{{ .RelPermalink }}">
+      {{ with $img }}
+      {{- $s := partial "srcset.html" (dict "image" . "widths" (slice 320 640 960) "sizes" "(min-width: 601px) 33vw, 100vw") }}
+      {{- with $s }}
+      <div class="usecase-card-media">
+        <img src="{{ .src }}" srcset="{{ .srcset }}" sizes="{{ .sizes }}"
+          width="{{ .width }}" height="{{ .height }}"
+          style="max-height: {{ $imgMaxH }}px;"
+          alt="{{ $title }}"
+          fetchpriority="high"
+          decoding="async">
+      </div>
+      {{- end }}
+      {{ end }}
+      <div class="usecase-card-body">
+        {{ with .Params.category }}<span class="usecase-card-category">{{ . }}</span>{{ end }}
+        <h3 class="usecase-card-title">{{ .Title }}</h3>
+        {{ with $summary }}<span class="usecase-card-summary">{{ . }}</span>{{ end }}
+      </div>
+    </a>
+  </article>
+  {{ else }}
+  <p class="pub-empty">No use cases published yet.</p>
+  {{ end }}
+</div>
+{{ with $paginator }}{{ partial "pagination.html" . }}{{ end }}
+{{ end }}

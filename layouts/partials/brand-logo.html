@@ -1,0 +1,34 @@
+{{- /* Overridable hook: renders the site logo in the header.
+  Sites can override this partial to embed their logo a different way.
+  Default implementation reads logo files from site.Params.logo, which may be:
+
+    logo: "/images/logos/my-logo.svg"          # string: same logo for light & dark
+    logo:                                       # dict: distinct light/dark logos
+      light: "/images/logos/my-logo.svg"
+      dark:  "/images/logos/my-logo-white.svg"
+
+  Logos may be `.svg` (inlined verbatim) or `.png` (rendered as an <img>), see
+  `partials/logo-img.html`. When `logo` is a string, the deprecated `logo_white`
+  (if still set) provides the dark variant; otherwise both modes share the single
+  `logo`. When no params are set the defaults are /images/logos/logo.svg (light)
+  and /images/logos/logo-white.svg (dark).
+
+  Files are resolved from the site's `static/` directory (like the original
+  StreamFlow/vpoline headers) or, if not found there, from the site's/theme's
+  `assets/` directory. Output is wrapped in `.custom-logo` / `.custom-logo-white`
+  spans so `main.scss` can swap them for dark/light mode.
+*/ -}}
+{{- $logo := "/images/logos/logo.svg" -}}
+{{- $logoWhite := "/images/logos/logo-white.svg" -}}
+{{- if reflect.IsMap .Site.Params.logo -}}
+  {{- $logo      = .Site.Params.logo.light | default $logo -}}
+  {{- $logoWhite = .Site.Params.logo.dark  | default $logoWhite -}}
+{{- else -}}
+  {{- $logo = .Site.Params.logo | default $logo -}}
+  {{- $logoWhite = $logo -}}
+  {{- if and (isset .Site.Params "logo_white") .Site.Params.logo_white -}}
+    {{- $logoWhite = .Site.Params.logo_white -}}
+  {{- end -}}
+{{- end -}}
+<span class="custom-logo">{{ partial "logo-img.html" (dict "path" $logo) }}</span>
+<span class="custom-logo custom-logo-white">{{ partial "logo-img.html" (dict "path" $logoWhite) }}</span>

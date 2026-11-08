@@ -1,0 +1,42 @@
+// ── Example site – theme variables (overrides) ───────────────────────────────
+// Copy of the theme's `assets/css/variables.scss` with the apodixis brand
+// applied (navy body + cyan "proof arrow" accents). We load the theme's default
+// maps and `map-merge` our overrides on top, so every `--*` / `--dark-*` key is
+// still emitted with the other defaults intact.
+
+@use "variables" as *;
+
+// Light overrides: ink-navy primary + a deeper cyan for light surfaces.
+// The logo's proof arrows are a very pale cyan (#5de8ef/#6af0f4) that looks
+// right on the navy hero but vanishes on light surfaces; we use a deeper cyan
+// sibling so icons/borders keep contrast, and tone muted text down.
+$defaults: map-merge($defaults, (
+  "primary": #0d6f85,
+  "hero-start": #011d2e,
+  "hero-end": #08475f,
+  "accent": #0d6f85,
+  "text-muted": #4a515e,
+  "success": #2ea043,
+));
+
+// Dark overrides — defined HERE ONCE as `--dark-*` variables. The theme's
+// `dark-theme` mixin sources every surfaced `--*` from its `--dark-*`
+// counterpart, so this single block is re-applied by BOTH the OS-dark switch and
+// the manual theme toggle — and any forced `theme_mode`. `--dark-primary` uses a
+// light cyan so links/headings stay readable on the dark surfaces; muted text is
+// brightened for contrast.
+$dark-defaults: map-merge($dark-defaults, (
+  "primary": #7ee0e6,
+  "accent": #6af0f4,
+  "text-muted": #9aa3b1,
+));
+
+// Emit into :root (mirrors the theme's variables.scss).
+:root {
+  @each $k, $v in $defaults {
+    --#{$k}: #{$v};
+  }
+  @each $k, $v in $dark-defaults {
+    --dark-#{$k}: #{$v};
+  }
+}

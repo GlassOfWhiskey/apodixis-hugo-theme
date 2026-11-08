@@ -1,0 +1,10 @@
+<footer class="site-footer">
+  <div class="footer-inner">
+    <span class="footer-copy">&copy; {{ now.Year }} <a href="/">{{ .Site.Title }}</a></span>
+    {{ partial "footer-logos.html" . }}
+    <span class="footer-right">
+      {{ partial "social-icons.html" . }}
+      <a href="#top" class="to-the-top">To the top ↑</a>
+    </span>
+  </div>
+</footer>
